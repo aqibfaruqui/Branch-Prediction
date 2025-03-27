@@ -2,7 +2,7 @@
 #include <fstream>
 
 int main() {
-    std::ifstream in("../output/sorted_counts.txt");
+    std::ifstream in("../data/sorted_counts.txt");
     unsigned long total = 3423933;
     unsigned long threshold = total * 0.9;
     unsigned long count_sum = 0;
