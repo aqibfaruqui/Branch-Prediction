@@ -13,13 +13,23 @@ class BranchTargetBuffer
 
         // Branch prediction & update BTB entry methods
         uint32_t predict(uint32_t pc);
-        void update(uint32_t source, uint32_t target, bool cond);
+        void update(uint32_t source, uint32_t target, bool cond, bool taken);
+
+        // States for 2-bit counter
+        enum State {
+            STRONGLY_NOT_TAKEN = 0,
+            WEAKLY_NOT_TAKEN = 1,
+            WEAKLY_TAKEN = 2,
+            STRONGLY_TAKEN = 3
+        };
+
 
     private:
         struct Node {
             uint32_t source;        // Branch instruction address
             uint32_t target;        // Branch target
             bool conditional;       // Conditional/Unconditional branch
+            State state;            // 2-bit prediction state
             Node* prev;             // Prev entry in LRU doubly linked list
             Node* next;             // Next entry in LRU doubly linked list
 

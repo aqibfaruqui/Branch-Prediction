@@ -23,24 +23,24 @@ int main(int argc, char* argv[])
         }
         total_branches++;
         uint32_t predicted = btb.predict(branch.source);        // Check BTB for entry
+        bool predicted_taken = (predicted != 0);                // Check entry state
 
         // Branch instruction address in BTB = Cache hit
-        if (predicted != 0) {               
+        if (predicted_taken) {               
             hits++;             
+        
             // Misprediction 2: Predicted taken but actually not taken
             if (!branch.taken) {
                 mispredictions++;
             }
-        } 
-        else {
-            // Misprediction 3: Predicted not taken but actually taken
-            if (branch.taken) {
-                mispredictions++;
-            }
+
+        // Misprediction 3: Predicted not taken but actually taken
+        } else if (branch.taken) {
+            mispredictions++;
         }
 
         // Cache all invariant branches
-        btb.update(branch.source, branch.target, branch.conditional);
+        btb.update(branch.source, branch.target, branch.conditional, branch.taken);
     }
 
     // 2 cycle penalty for mispredicted branches

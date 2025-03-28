@@ -2,7 +2,7 @@
 
 /* Cache Entry Constructor */
 BranchTargetBuffer::Node::Node(uint32_t k, uint32_t v, bool c)
-    : source(k), target(v), conditional(c), prev(nullptr), next(nullptr) {}
+    : source(k), target(v), conditional(c), state(WEAKLY_TAKEN), prev(nullptr), next(nullptr) {}
 
 /* Cache Constructor */
 BranchTargetBuffer::BranchTargetBuffer(size_t size) : capacity(size) {
@@ -45,30 +45,36 @@ uint32_t BranchTargetBuffer::predict(uint32_t pc) {
         Node* node = it->second;
         remove(node);                   
         add(node);                      
-        return node->target;
+        return (node->state >= WEAKLY_TAKEN) ? node->target : 0;       // Predict taken if in WEAKLY_TAKEN or STRONGLY_TAKEN
     }
     return 0;
 }
 
 /* Adds new entry/Moves existing entry in LRU cache */
-void BranchTargetBuffer::update(uint32_t source, uint32_t target, bool cond) {
+void BranchTargetBuffer::update(uint32_t source, uint32_t target, bool cond, bool taken) {
     auto it = cache.find(source);
+    Node* node;
+
     if (it != cache.end()) {
-        Node* node = it->second;
-        node->target = target;
-        remove(node);
-        add(node);
-        return;
+        node = it->second;
+        remove(node);               // Remove existing entry to update position on add(node)
+    } else {
+        if (cache.size() >= capacity) {
+            Node* lru = tail->prev;
+            cache.erase(lru->source);
+            remove(lru);            // Remove LRU if capacity exceeded to make space for add(node)
+            delete lru;
+        }
+        node = new Node(source, target, cond);
+        cache[source] = node;
     }
     
-    if (cache.size() >= capacity) {
-        Node* lru = tail->prev;
-        cache.erase(lru->source);
-        remove(lru);
-        delete lru;
+    // Update 2-bit counter
+    if (taken) {
+        node->state = (node->state == STRONGLY_TAKEN) ? STRONGLY_TAKEN : static_cast<State>(node->state + 1);
+    } else {
+        node->state = (node->state == STRONGLY_NOT_TAKEN) ? STRONGLY_NOT_TAKEN : static_cast<State>(node->state - 1);
     }
     
-    Node* newNode = new Node(source, target, cond);
-    add(newNode);
-    cache[source] = newNode;
+    add(node);  
 }
