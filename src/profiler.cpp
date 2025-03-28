@@ -1,23 +1,24 @@
 #include "profiler.h"
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 /* Process branch encounter's type, source/target addresses, and conditional/taken statuses */
+// Example branch encounters:
+//      Invariant: B from 00008008 to 00008040 F * taken
+//        Variant: M from 00026488               ? not taken
 BranchEncounter parseLine(const std::string& line) 
 {
     BranchEncounter branch;
     std::istringstream input(line);
     input >> branch.type;           
-    
-    // Example branch encounters:
-    // Invariant: B from 00008008 to 00008040 F * taken
-    //   Variant: M from 00026488               ? not taken
-    if (branch.type == 'B') {
-        input.ignore(6);                        // Skip " from " in "B from 00008008 ...""
-        input >> std::hex >> branch.source;     // Parse branch instruction PC
+    input.ignore(6);                        // Skip " from " in "B from 00008008 ...""
 
+    if (branch.type == 'B') {
+        input >> std::hex >> branch.source;     // Parse branch instruction PC
         input.ignore(4);                        // Skip " to " in "00008008 to 00008040 ..."
         input >> std::hex >> branch.target;     // Parse branch target address (invariant only)
+        input.ignore(3);                        // Skip " B " / " F " in "... to 00008040 F * taken"
     
     // Variant branch target addresses are undetermined
     } else {
