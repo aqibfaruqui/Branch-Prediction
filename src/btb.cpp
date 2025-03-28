@@ -2,7 +2,7 @@
 
 /* Cache Entry Constructor */
 BranchTargetBuffer::Node::Node(uint32_t k, uint32_t v, bool c)
-    : pc(k), target(v), conditional(c), prev(nullptr), next(nullptr) {}
+    : source(k), target(v), conditional(c), prev(nullptr), next(nullptr) {}
 
 /* Cache Constructor */
 BranchTargetBuffer::BranchTargetBuffer(size_t size) : capacity(size) {
@@ -12,7 +12,7 @@ BranchTargetBuffer::BranchTargetBuffer(size_t size) : capacity(size) {
     tail->prev = head;
 }
 
-/* Cache Desctructor */
+/* Cache Destructor */
 BranchTargetBuffer::~BranchTargetBuffer() {
     Node* curr = head->next;
     while (curr != tail) {
@@ -51,8 +51,8 @@ uint32_t BranchTargetBuffer::predict(uint32_t pc) {
 }
 
 /* Adds new entry/Moves existing entry in LRU cache */
-void BranchTargetBuffer::update(uint32_t pc, uint32_t target, bool cond) {
-    auto it = cache.find(pc);
+void BranchTargetBuffer::update(uint32_t source, uint32_t target, bool cond) {
+    auto it = cache.find(source);
     if (it != cache.end()) {
         Node* node = it->second;
         node->target = target;
@@ -63,12 +63,12 @@ void BranchTargetBuffer::update(uint32_t pc, uint32_t target, bool cond) {
     
     if (cache.size() >= capacity) {
         Node* lru = tail->prev;
-        cache.erase(lru->pc);
+        cache.erase(lru->source);
         remove(lru);
         delete lru;
     }
     
-    Node* newNode = new Node(pc, target, cond);
+    Node* newNode = new Node(source, target, cond);
     add(newNode);
-    cache[pc] = newNode;
+    cache[source] = newNode;
 }

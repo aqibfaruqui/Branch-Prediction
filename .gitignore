@@ -1,2 +1,5 @@
 .vscode/
-execution_proportion
+src/execution_proportion
+src/main
+src/btb
+src/profiler

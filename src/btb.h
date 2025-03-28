@@ -13,11 +13,11 @@ class BranchTargetBuffer
 
         // Branch prediction & update BTB entry methods
         uint32_t predict(uint32_t pc);
-        void update(uint32_t pc, uint32_t target, bool cond);
+        void update(uint32_t source, uint32_t target, bool cond);
 
     private:
         struct Node {
-            uint32_t pc;            // Branch instruction address
+            uint32_t source;        // Branch instruction address
             uint32_t target;        // Branch target
             bool conditional;       // Conditional/Unconditional branch
             Node* prev;             // Prev entry in LRU doubly linked list
