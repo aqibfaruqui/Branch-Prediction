@@ -18,14 +18,16 @@ BranchEncounter parseLine(const std::string& line)
         input >> std::hex >> branch.source;     // Parse branch instruction PC
         input.ignore(4);                        // Skip " to " in "00008008 to 00008040 ..."
         input >> std::hex >> branch.target;     // Parse branch target address (invariant only)
-        input.ignore(3);                        // Skip " B " / " F " in "... to 00008040 F * taken"
+        char dir;
+        input >> branch.direction;              // Parse forward/backward branch direction
     
     // Variant branch target addresses are undetermined
     } else {
         input >> std::hex >> branch.source;
         branch.target = 0;
+        branch.direction = 'N';
     }
-    
+
     // ? = Conditional, * = Unconditional
     char cond;
     input >> cond;
