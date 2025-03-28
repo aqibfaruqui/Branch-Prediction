@@ -1,0 +1,10 @@
+B from 00008008 to 00008040 F * taken
+R from 00008070               ? not taken
+B from 0000807C to 00008070 B * taken
+R from 00008070               ? not taken
+B from 0000807C to 00008070 B * taken
+R from 00008070               ? not taken
+B from 0000807C to 00008070 B * taken
+R from 00008070               ? not taken
+B from 0000807C to 00008070 B * taken
+R from 00008070               ? not taken
