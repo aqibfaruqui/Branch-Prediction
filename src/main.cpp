@@ -6,7 +6,7 @@ int main(int argc, char* argv[])
 {
     const size_t BTB_SIZE = (argc > 1) ? std::stoul(argv[1]) : 32;      // Default cache size to 32 given no input
     BranchTargetBuffer btb(BTB_SIZE);
-    std::vector<BranchEncounter> branches = parseProfile("data/block_profile");
+    std::vector<BranchEncounter> branches = parseProfile("data/block_profile_50");
 
     size_t hits = 0;
     size_t total_branches = 0;

@@ -6,26 +6,27 @@ BranchTargetBuffer::Node::Node(uint32_t k, uint32_t v, bool c)
 
 /* Cache Constructor */
 BranchTargetBuffer::BranchTargetBuffer(size_t size) : capacity(size) {
-    head = new Node(0, 0, false);
-    tail = new Node(0, 0, false);
+    head = std::make_shared<Node>(0, 0, false);
+    tail = std::make_shared<Node>(0, 0, false);
     head->next = tail;
     tail->prev = head;
 }
 
 /* Cache Destructor */
 BranchTargetBuffer::~BranchTargetBuffer() {
-    Node* curr = head->next;
+    auto curr = head->next;
     while (curr != tail) {
-        Node* tmp = curr;
+        auto tmp = curr;
         curr = curr->next;
-        delete tmp;
+        tmp->prev.reset();
+        tmp->next.reset();
     }
-    delete head;
-    delete tail;
+    head.reset();
+    tail.reset();
 }
 
 /* Inserts node between head and head->next (at MRU position) */
-void BranchTargetBuffer::add(Node* node) {
+void BranchTargetBuffer::add(std::shared_ptr<Node> node) {
     node->next = head->next;
     node->prev = head;
     head->next->prev = node;
@@ -33,7 +34,7 @@ void BranchTargetBuffer::add(Node* node) {
 }
 
 /* Removes node and reestablishes neighbour links */
-void BranchTargetBuffer::remove(Node* node) {
+void BranchTargetBuffer::remove(std::shared_ptr<Node> node) {
     node->prev->next = node->next;
     node->next->prev = node->prev;
 }
@@ -42,7 +43,7 @@ void BranchTargetBuffer::remove(Node* node) {
 uint32_t BranchTargetBuffer::predict(uint32_t pc) {
     auto it = cache.find(pc);
     if (it != cache.end()) {
-        Node* node = it->second;
+        auto node = it->second;
         remove(node);                   
         add(node);                      
         return (node->state >= WEAKLY_TAKEN) ? node->target : 0;       // Predict taken if in WEAKLY_TAKEN or STRONGLY_TAKEN
@@ -53,19 +54,18 @@ uint32_t BranchTargetBuffer::predict(uint32_t pc) {
 /* Adds new entry/Moves existing entry in LRU cache */
 void BranchTargetBuffer::update(uint32_t source, uint32_t target, bool cond, bool taken) {
     auto it = cache.find(source);
-    Node* node;
+    std::shared_ptr<Node> node;
 
     if (it != cache.end()) {
         node = it->second;
         remove(node);               // Remove existing entry to update position on add(node)
     } else {
         if (cache.size() >= capacity) {
-            Node* lru = tail->prev;
+            auto lru = tail->prev;
             cache.erase(lru->source);
             remove(lru);            // Remove LRU if capacity exceeded to make space for add(node)
-            delete lru;
         }
-        node = new Node(source, target, cond);
+        node = std::make_shared<Node>(source, target, cond);
         cache[source] = node;
     }
     

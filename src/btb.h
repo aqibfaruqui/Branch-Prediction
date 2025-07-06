@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <unordered_map>
+#include <memory>
 
 class BranchTargetBuffer 
 {
@@ -30,19 +31,19 @@ class BranchTargetBuffer
             uint32_t target;        // Branch target
             bool conditional;       // Conditional/Unconditional branch
             State state;            // 2-bit prediction state
-            Node* prev;             // Prev entry in LRU doubly linked list
-            Node* next;             // Next entry in LRU doubly linked list
+            std::shared_ptr<Node> prev;  // Prev entry in LRU doubly linked list
+            std::shared_ptr<Node> next;  // Next entry in LRU doubly linked list
 
             // Constructor
             Node(uint32_t key, uint32_t val, bool cond);
         };
 
-        Node* head;                 // Dummy node before MRU node
-        Node* tail;                 // Dummy node after LRU node
+        std::shared_ptr<Node> head;     // Dummy node before MRU node
+        std::shared_ptr<Node> tail;     // Dummy node after LRU node
         size_t capacity;
-        std::unordered_map<uint32_t, Node*> cache;
+        std::unordered_map<uint32_t, std::shared_ptr<Node>> cache;
 
         // Cache update methods
-        void add(Node* node);
-        void remove(Node* node);
+        void add(std::shared_ptr<Node> node);
+        void remove(std::shared_ptr<Node> node);
 };
