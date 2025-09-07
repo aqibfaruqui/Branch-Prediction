@@ -12,7 +12,7 @@ Branch Target Buffer (BTB) with 2-bit saturating counter
 ### Dynamic Branch Prediction & BTB Implementation
 - **2-bit saturating counter** with four prediction states (Strongly Not Taken, Weakly Not Taken, Weakly Taken, Strongly Taken)
 - **Branch handling**: Supports both invariant (B-type) and variant (R, D, M, L-type) branches
-- **Doubly-linked list LRU ordering & hashmap** caching strategy and implemenation of BTB
+- **Doubly-linked list LRU ordering & hashmap** caching strategy and implementation of BTB
 
 ### Performance Analysis (more in scripts/branch_prediction_report.pdf)
 - **Configurable BTB sizes** from 8 to 1024+ entries
